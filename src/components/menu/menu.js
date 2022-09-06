@@ -259,6 +259,7 @@ export default {
           },
           click: (obj) => {
             obj.selectedKeys = [obj.key]
+            this.$refreshPage(obj.key)
             this.$emit('select', obj)
           }
         }
