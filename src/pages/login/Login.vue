@@ -120,8 +120,9 @@ export default {
         // 获取路由配置
         getRoutesConfig().then(result => {
           const routesConfig = result.data.data
+          console.log('routesConfig',routesConfig)
           loadRoutes(routesConfig)
-          this.$router.push('/dashboard/workplace')
+          this.$router.push(routesConfig[0].children[0].router)
           this.$message.success(loginRes.message, 3)
         })
       } else {

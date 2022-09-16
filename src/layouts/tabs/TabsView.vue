@@ -15,9 +15,10 @@
     <div :class="['tabs-view-content', layout, pageWidth]" :style="`margin-top: ${multiPage ? -24 : 0}px`">
       <page-toggle-transition :disabled="animate.disabled" :animate="animate.name" :direction="animate.direction">
         <a-keep-alive :exclude-keys="excludeKeys" v-if="multiPage && cachePage" v-model="clearCaches">
-          <router-view v-if="!refreshing" ref="tabContent" :key="$route.path" />
+          <!-- <router-view v-if="!refreshing" ref="tabContent" :key="$route.path" /> -->
+          <iframe border='1' :src="$route.meta.url"></iframe>
         </a-keep-alive>
-        <router-view ref="tabContent" v-else-if="!refreshing" />
+        <!-- <router-view ref="tabContent" v-else-if="!refreshing" /> -->
       </page-toggle-transition>
     </div>
   </admin-layout>
@@ -90,6 +91,7 @@ export default {
     '$route': function (newRoute) {
       this.activePage = newRoute.path
       console.log(newRoute,'newRoute')
+      console.log(this.pageList)
       const page = this.pageList.find(item => item.path === newRoute.path)
 
       let overwriteNewRoute = {
@@ -135,7 +137,17 @@ export default {
   },
   methods: {
     add(){
-      console.log(this.pageList)
+      // console.log(this.pageList)
+      // this.pageList.push({
+      //   keyPath: '/shareview',
+      //   fullPath:'/shareview', 
+      //   loading: false,
+      //   path: '/shareview/1',
+      //   title: 123,
+      //   redirectUrl:'https://www.bilibili.com',
+       
+      //   unclose:false
+      // })
       this.$router.push({
         path:'/shareview/111',
         query:{
@@ -146,8 +158,12 @@ export default {
     },
     changePage (key) {
       this.activePage = key
+      console.log(key)
       const page = this.pageList.find(item => item.path === key)
-      this.$router.push(page.fullPath)
+      console.log(page)
+    
+        this.$router.push(page.fullPath)
+      
       
     },
     remove (key, next) {
@@ -168,6 +184,7 @@ export default {
           path:this.activePage,
           query: this.pageList[index]?.query || {}
         }
+        console.log(routerParams)
         this.$router.push(routerParams)
       }
     },

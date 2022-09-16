@@ -224,7 +224,10 @@ export default {
       })
     },
     updateMenu () {
+      // console.log('update',fastEqual)
+      if(this.$route.path.startsWith('/shareview')) return;
       this.selectedKeys = this.getSelectedKeys()
+      console.log('this.selectedKeys',this.selectedKeys)
       let openKeys = this.selectedKeys.filter(item => item !== '')
       openKeys = openKeys.slice(0, openKeys.length -1)
       if (!fastEqual(openKeys, this.sOpenKeys)) {

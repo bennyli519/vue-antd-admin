@@ -196,6 +196,7 @@ function formatRoutes(routes) {
       route.path = '/' + path
     }
   })
+  console.log('----',routes)
   formatAuthority(routes)
 }
 

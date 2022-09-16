@@ -26,6 +26,9 @@ window.openTab = (title, redirectUrl) => {
   console.log('title,', title);
   router.push({
     path: `/shareview/${new Date().getTime()}`,
+    meta:{
+      url:redirectUrl
+    },
     query: {
       title,
       redirectUrl,

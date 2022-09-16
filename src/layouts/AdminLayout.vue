@@ -79,10 +79,12 @@ export default {
     },
     headMenuData() {
       const {layout, menuData, firstMenu} = this
+      console.log('firstMenu',firstMenu)
       return layout === 'mix' ? firstMenu : menuData
     },
     sideMenuData() {
       const {layout, menuData, subMenu} = this
+      
       return layout === 'mix' ? subMenu : menuData
     }
   },

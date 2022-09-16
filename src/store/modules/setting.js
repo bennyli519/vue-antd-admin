@@ -47,6 +47,8 @@ export default {
         formatFullPath(menuData)
       }
       const current = menuData.find(menu => menu.fullPath === activatedFirst)
+      // if(current.name === 'shareview') return;
+      // console.log('current',current)
       return current && current.children || []
     }
   },
