@@ -14,12 +14,19 @@
     />
     <div :class="['tabs-view-content', layout, pageWidth]" :style="`margin-top: ${multiPage ? -24 : 0}px`">
       <page-toggle-transition :disabled="animate.disabled" :animate="animate.name" :direction="animate.direction">
-        <a-keep-alive :exclude-keys="excludeKeys" v-if="multiPage && cachePage" v-model="clearCaches">
-          <!-- <router-view v-if="!refreshing" ref="tabContent" :key="$route.path" /> -->
-          <iframe border='1' :src="$route.meta.url"></iframe>
-        </a-keep-alive>
+        <!-- <a-keep-alive :exclude-keys="excludeKeys" v-if="multiPage && cachePage" v-model="clearCaches">
+          <router-view v-if="!refreshing" ref="tabContent" :key="$route.path" />
+        </a-keep-alive> -->
         <!-- <router-view ref="tabContent" v-else-if="!refreshing" /> -->
+          <template >
+            <div v-for="item,index in pageList" v-show="item.path == activePage"  :key="item.path">
+              <div>{{item.redirectUrl}}</div>
+              <div>{{`iframe${item.path.replaceAll('/','_')}`}}</div>
+              <iframe :ref="`iframe${item.path.replaceAll('/','_')}`" width="100%" height="500"  :border="index" :src="item.redirectUrl"></iframe>
+            </div>
+          </template>
       </page-toggle-transition>
+
     </div>
   </admin-layout>
 </template>
@@ -30,13 +37,13 @@ import Contextmenu from '@/components/menu/Contextmenu'
 import PageToggleTransition from '@/components/transition/PageToggleTransition'
 import {mapState, mapMutations} from 'vuex'
 import {getI18nKey} from '@/utils/routerUtil'
-import AKeepAlive from '@/components/cache/AKeepAlive'
+// import AKeepAlive from '@/components/cache/AKeepAlive'
 import TabsHead from '@/layouts/tabs/TabsHead'
 
 export default {
   name: 'TabsView',
   i18n: require('./i18n'),
-  components: {TabsHead, PageToggleTransition, Contextmenu, AdminLayout , AKeepAlive },
+  components: {TabsHead, PageToggleTransition, Contextmenu, AdminLayout  },
   data () {
     return {
       clearCaches: [],
@@ -73,6 +80,7 @@ export default {
       this.$nextTick(() => {
         this.setCachedKey(route)
       })
+      this.listenOpenTab()
       this.addListener()
     }
   },
@@ -136,7 +144,27 @@ export default {
     }
   },
   methods: {
+    listenOpenTab(){
+      this.$bus.$on("openTab", ({ title, redirectUrl, icon }) => {
+        console.log("openTab", title, redirectUrl, icon);
+        const route = {
+          keyPath: "/shareview",
+          fullPath: "/shareview",
+          loading: false,
+          path: `/shareview?${new Date().getTime()}`,
+          title,
+          redirectUrl,
+          unclose: false,
+        };
+        this.pageList.push(route);
+        this.changePage(route.path);
+      });
+    },
     add(){
+      this.$bus.$emit('openTab', {
+        title:'test',
+        redirectUrl: 'https://jsonformatter.org/'
+      });
       // console.log(this.pageList)
       // this.pageList.push({
       //   keyPath: '/shareview',
@@ -148,21 +176,26 @@ export default {
        
       //   unclose:false
       // })
-      this.$router.push({
-        path:'/shareview/111',
-        query:{
-          title:'自定义title111',
-          redirectUrl:'https://www.bilibili.com'
-        }
-      })
+      // this.$router.push({
+      //   path:'/shareview/111',
+      //   query:{
+      //     title:'自定义title111',
+      //     redirectUrl:'https://jsonformatter.org/'
+      //   }
+      // })
     },
     changePage (key) {
       this.activePage = key
-      console.log(key)
       const page = this.pageList.find(item => item.path === key)
-      console.log(page)
-    
-        this.$router.push(page.fullPath)
+      console.log(key)
+      if (key.startsWith("/shareview")) {
+        const url = page.redirectUrl;
+        console.log("changePage", url);
+        this.customUrl = url;
+      } else {
+        this.customUrl = "";
+        this.$router.push(page.fullPath);
+      }
       
       
     },
@@ -264,6 +297,11 @@ export default {
           if (typeof onLoaded === 'function') {
             onLoaded.apply(this, [])
           }
+          //重新刷新 iframe
+          const currentIframeName =`iframe${this.activePage.replaceAll('/','_')}`
+          console.log('currentIframeName',currentIframeName)
+          console.log(this.$refs[currentIframeName])
+          this.$refs[currentIframeName][0]?.contentWindow.location.reload();
         })
       }, 200)
     },
@@ -320,7 +358,9 @@ export default {
 
       return {
         keyPath: route.matched[route.matched.length - 1].path,
-        fullPath: route.fullPath, loading: false,
+        fullPath: route.fullPath, 
+        loading: false,
+        redirectUrl:route.meta.url,
         path: route.path,
         title: route.meta && route.meta.page && route.meta.page.title,
         ...(isNeedQuery && {query:route.query}),
@@ -335,8 +375,8 @@ export default {
       const page = this.pageList.find(item => item.path === route.path)
       page.unclose = route.meta && route.meta.page && (route.meta.page.closable === false)
       if (!page._init_) {
-        const vnode = this.$refs.tabContent.$vnode
-        page.cachedKey = vnode.key + vnode.componentOptions.Ctor.cid
+        // const vnode = this.$refs.tabContent.$vnode
+        page.cachedKey = route.path
         page._init_ = true
       }
     },

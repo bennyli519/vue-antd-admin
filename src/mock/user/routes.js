@@ -26,7 +26,7 @@ Mock.mock(`${process.env.VUE_APP_API_BASE_URL}/routes`, 'get', () => {
                   name: '工作台',
                   icon: 'icon-img',
                   meta: {
-                    url: '../moduleclub/moduleShow.aspx?ShowType=persional&MyEnt=&MyTeam=&ModuleName=KHDworkplace',
+                    url: 'https://www.bilibili.com/',
                   },
                 },
                 {
@@ -34,7 +34,7 @@ Mock.mock(`${process.env.VUE_APP_API_BASE_URL}/routes`, 'get', () => {
                   name: '个人信息',
                   icon: 'icon-img',
                   meta: {
-                    url: '../moduleclub/moduleShow.aspx?ShowType=persional&MyEnt=&MyTeam=&ModuleName=userInformation',
+                    url: 'https://jsonformatter.org/',
                   },
                 },
                 {
