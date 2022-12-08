@@ -27,6 +27,11 @@ const options = {
       redirect: '/login',
       children: [
         {
+          path: 'shareview/:path',
+          name: '自定义标题',
+          component: () => import('@/pages/shareview/index'),
+        },
+        {
           path: 'dashboard',
           name: 'Dashboard',
           meta: {

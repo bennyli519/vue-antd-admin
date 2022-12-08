@@ -1,6 +1,8 @@
+/* eslint-disable vue/no-unused-components */
 <template>
   <admin-layout>
     <contextmenu :itemList="menuItemList" :visible.sync="menuVisible" @select="onMenuSelect" />
+    <Button @click="add">test</Button>
     <tabs-head
         v-if="multiPage"
         :active="activePage"
@@ -87,21 +89,39 @@ export default {
     },
     '$route': function (newRoute) {
       this.activePage = newRoute.path
+      console.log(newRoute,'newRoute')
       const page = this.pageList.find(item => item.path === newRoute.path)
+
+      let overwriteNewRoute = {
+        ...newRoute
+      }
+
+      if(newRoute.path.startsWith('/shareview')){
+        overwriteNewRoute = {
+          ...overwriteNewRoute,
+          meta:{
+            page:{
+              title:newRoute.query.title || 'default title'
+            }
+          }
+        }
+      }
+
       if (!this.multiPage) {
-        this.pageList = [this.createPage(newRoute)]
+        this.pageList = [this.createPage(overwriteNewRoute)]
       } else if (page) {
         page.fullPath = newRoute.fullPath
       } else if (!page) {
-        this.pageList.push(this.createPage(newRoute))
+        this.pageList.push(this.createPage(overwriteNewRoute))
       }
       if (this.multiPage) {
         this.$nextTick(() => {
-          this.setCachedKey(newRoute)
+          this.setCachedKey(overwriteNewRoute)
         })
       }
     },
     'multiPage': function (newVal) {
+      console.log('mult',newVal)
       if (!newVal) {
         this.pageList = [this.createPage(this.$route)]
         this.removeListener()
@@ -114,12 +134,24 @@ export default {
     }
   },
   methods: {
+    add(){
+      console.log(this.pageList)
+      this.$router.push({
+        path:'/shareview/111',
+        query:{
+          title:'自定义title111',
+          redirectUrl:'https://www.bilibili.com'
+        }
+      })
+    },
     changePage (key) {
       this.activePage = key
       const page = this.pageList.find(item => item.path === key)
       this.$router.push(page.fullPath)
+      
     },
     remove (key, next) {
+      console.log('removeee',key,next)
       if (this.pageList.length === 1) {
         return this.$message.warning(this.$t('warn'))
       }
@@ -127,11 +159,16 @@ export default {
       let index = this.pageList.findIndex(item => item.path === key)
       this.clearCaches = this.pageList.splice(index, 1).map(page => page.cachedKey)
       if (next) {
+        console.log('next',next)
         this.$router.push(next)
       } else if (key === this.activePage) {
         index = index >= this.pageList.length ? this.pageList.length - 1 : index
         this.activePage = this.pageList[index].path
-        this.$router.push(this.activePage)
+        const routerParams = {
+          path:this.activePage,
+          query: this.pageList[index]?.query || {}
+        }
+        this.$router.push(routerParams)
       }
     },
     refresh (key, page) {
@@ -147,6 +184,7 @@ export default {
     },
     onContextmenu(pageKey, e) {
       if (pageKey) {
+        console.log('pageKey',pageKey)
         e.preventDefault()
         e.meta = pageKey
         this.menuVisible = true
@@ -258,11 +296,17 @@ export default {
       sessionStorage.setItem(process.env.VUE_APP_TBAS_KEY, JSON.stringify(tabs))
     },
     createPage(route) {
+      console.log('route',route)
+      const isNeedQuery = Object.keys(route.query).length>0;
+  
+      
+
       return {
         keyPath: route.matched[route.matched.length - 1].path,
         fullPath: route.fullPath, loading: false,
         path: route.path,
         title: route.meta && route.meta.page && route.meta.page.title,
+        ...(isNeedQuery && {query:route.query}),
         unclose: route.meta && route.meta.page && (route.meta.page.closable === false),
       }
     },

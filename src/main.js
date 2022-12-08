@@ -22,6 +22,17 @@ Vue.use(Plugins)
 
 bootstrap({router, store, i18n, message: Vue.prototype.$message})
 
+window.openTab = (title, redirectUrl) => {
+  console.log('title,', title);
+  router.push({
+    path: `/shareview/${new Date().getTime()}`,
+    query: {
+      title,
+      redirectUrl,
+    },
+  });
+};
+
 new Vue({
   router,
   store,
